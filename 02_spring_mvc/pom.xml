@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.gdu</groupId>
-	<artifactId>prj02</artifactId>
-	<name>02_spring_mvc</name>
-	<packaging>war</packaging>
-	<version>1.0.0-BUILD-SNAPSHOT</version>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.gdu</groupId>
+  <artifactId>prj02</artifactId>
+  <name>02_spring_mvc</name>
+  <packaging>war</packaging>
+  <version>1.0.0-BUILD-SNAPSHOT</version>
   
   <properties>
     <java-version>11</java-version>
@@ -123,12 +123,12 @@
     </dependency>   
     <!-- Servlet -->
     <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-    <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>4.0.1</version>
-        <scope>provided</scope>
-    </dependency>
+<dependency>
+  <groupId>jakarta.servlet</groupId>
+  <artifactId>jakarta.servlet-api</artifactId>
+  <version>6.0.0</version>
+  <scope>provided</scope>
+</dependency>
     <!-- https://mvnrepository.com/artifact/javax.servlet.jsp/javax.servlet.jsp-api -->
     <dependency>
         <groupId>javax.servlet.jsp</groupId>
@@ -136,12 +136,17 @@
         <version>2.3.3</version>
         <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jstl</artifactId>
-      <version>1.2</version>
-    </dependency>
-  
+<dependency>
+  <groupId>jakarta.servlet.jsp.jstl</groupId>
+  <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+  <version>3.0.0</version>
+</dependency>
+    
+<dependency>
+  <groupId>org.glassfish.web</groupId>
+  <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+  <version>3.0.1</version>
+</dependency>
     <!-- Test -->
     <dependency>
       <groupId>junit</groupId>
