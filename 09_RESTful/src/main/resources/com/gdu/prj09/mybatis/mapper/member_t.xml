@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gdu.prj09.mybatis.mapper.member_t">
+
+  <!--
+    parameterType
+    1. 쿼리문으로 전달되는 파라미터의 타입을 명시한다.
+    2. 작성 예시
+      1) parameterType="com.gdu.prj.dto.BoardDto"
+      2) parameterType="Map"
+      3) parameterType="String" - 변수를 하나만 전달하는 경우 생략할 수 있다.
+      4) parameterType="int"    - 변수를 하나만 전달하는 경우 생략할 수 있다.
+      5) parameterType="double" - 변수를 하나만 전달하는 경우 생략할 수 있다.
+  -->
+  
+  <!--
+    parameter 작성 방법
+    1. #{}
+      1) PreparedStatement 를 이용하여 ? 에 값을 저장하는 JDBC 방식으로 처리한다.
+      2) 변수 값을 처리할 때 사용한다.
+      2) 객체나 Map 에 저장된 프로퍼티(필드, Key)를 입력한다.
+    2. ${}
+      1) 문자열 대체는 전달된 값을 따옴표나 이스케이프 없이 그대로 사용한다.
+      2) SQL 구문의 메타데이터(테이블 이름, 칼럼 이름, SQL 자체)를 처리할 때 사용한다.
+  -->
+
+  <!--
+    resultType
+    1. SELECT 문의 반환 값의 타입을 명시한다.
+    2. INSERT / UPDATE / DELETE 는 resultType 속성을 작성하지 않는다. (resultType="int" 로 미리 정의되어 있다.)
+    3. 작성 예시
+      1) resultType="com.gdu.prj.dto.BoardDto"
+      2) resultType="int"
+      3) resultType="double"
+  -->
+  
+  <resultMap type="AddressDto" id="AddressMap">
+    <id     column="ADDRESS_NO"       property="addressNo" />
+    <result column="ZONECODE"         property="zonecode" />
+    <result column="ADDRESS"          property="address" />
+    <result column="DETAIL_ADDRESS"   property="detailAddress" />
+    <result column="EXTRA_ADDRESS"    property="extraAddress" />
+    <association javaType="MemberDto" property="member">
+      <id     column="MEMBER_NO"      property="memberNo" />
+      <result column="EMAIL"          property="email" />
+      <result column="NAME"           property="name" />
+      <result column="GENDER"         property="gender" />
+    </association>
+  </resultMap>
+
+  <insert id="insertMember"
+          parameterType="MemberDto">
+    <selectKey keyProperty="memberNo" resultType="int" order="BEFORE">
+      SELECT MEMBER_SEQ.NEXTVAL
+        FROM DUAL
+    </selectKey>
+    INSERT INTO MEMBER_T (
+        MEMBER_NO
+      , EMAIL
+      , NAME
+      , GENDER
+    ) VALUES (
+        #{memberNo}
+      , #{email}
+      , #{name}
+      , #{gender}
+    )
+  </insert>
+
+  <insert id="insertAddress"
+          parameterType="AddressDto">
+    INSERT INTO ADDRESS_T (
+        ADDRESS_NO
+      , ZONECODE
+      , ADDRESS
+      , DETAIL_ADDRESS
+      , EXTRA_ADDRESS
+      , MEMBER_NO
+    ) VALUES (
+        ADDRESS_SEQ.NEXTVAL
+      , #{zonecode}
+      , #{address}
+      , #{detailAddress}
+      , #{extraAddress}
+      , #{member.memberNo}
+    )
+  </insert>
+  
+  <update id="updateMember"
+          parameterType="Map">
+    UPDATE MEMBER_T
+       SET NAME = #{name}
+         , GENDER = #{gender}
+     WHERE MEMBER_NO = #{memberNo}  
+  </update>
+  
+  <update id="updateAddress"
+          parameterType="Map">
+    UPDATE ADDRESS_T
+       SET ZONECODE = #{zonecode}
+         , ADDRESS = #{address}
+         , DETAIL_ADDRESS = #{detailAddress}
+         , EXTRA_ADDRESS = #{extraAddress}
+     WHERE MEMBER_NO = #{memberNo}
+  </update>
+  
+  <delete id="deleteMember"
+          parameterType="int">
+    DELETE
+      FROM MEMBER_T
+     WHERE MEMBER_NO = #{memberNo}
+  </delete>
+
+  <delete id="deleteMembers">
+    DELETE
+      FROM MEMBER_T
+     WHERE MEMBER_NO
+     <foreach collection="list" item="memberNo" open="IN(" separator="," close=")">
+      #{memberNo}      
+     </foreach>
+  </delete>
+  
+  <select id="getTotalMemberCount"
+          resultType="int">
+    SELECT COUNT(*)
+      FROM MEMBER_T
+  </select>
+  
+  <select id="getMemberList"
+          parameterType="Map"
+          resultMap="AddressMap">
+    SELECT MEMBER_NO, EMAIL, NAME, GENDER, ADDRESS_NO, ZONECODE, ADDRESS, DETAIL_ADDRESS, EXTRA_ADDRESS
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY M.MEMBER_NO DESC) AS RN
+                 , M.MEMBER_NO, M.EMAIL, M.NAME, M.GENDER
+                 , A.ADDRESS_NO, A.ZONECODE, A.ADDRESS, A.DETAIL_ADDRESS, A.EXTRA_ADDRESS
+             FROM MEMBER_T M INNER JOIN ADDRESS_T A
+               ON M.MEMBER_NO = A.MEMBER_NO)
+     WHERE RN BETWEEN #{begin} AND #{end} 
+  </select>
+  
+  <select id="getMemberNo"
+          resultType="MemberDto">
+    SELECT MEMBER_NO, EMAIL, NAME, GENDER
+      FROM MEMBER_T
+     WHERE MEMBER_NO = #{memberNo}
+  </select>
+  
+  <select id="getTotalAddressCountByNo"
+          resultType="int">
+    SELECT COUNT(*)
+      FROM ADDRESS_T
+     WHERE MEMBER_NO = #{memberNo}
+  </select>
+  
+  <select id="getAddressListByNo"
+          parameterType="Map"
+          resultType="AddressDto">
+    SELECT ADDRESS_NO, ZONECODE, ADDRESS, DETAIL_ADDRESS, EXTRA_ADDRESS
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY ADDRESS_NO DESC) AS RN, ADDRESS_NO, ZONECODE, ADDRESS, DETAIL_ADDRESS, EXTRA_ADDRESS
+              FROM ADDRESS_T
+             WHERE MEMBER_NO = #{memberNo})
+     WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+</mapper>
